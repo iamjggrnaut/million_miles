@@ -358,7 +358,7 @@ export default function CarsPage() {
               <div className="mt-8 flex justify-center gap-2">
                 <button
                   type="button"
-                  disabled={params.page <= 1}
+                  disabled={(params.page ?? 1) <= 1}
                   onClick={() =>
                     setParams((p) => ({ ...p, page: (p.page ?? 1) - 1 }))
                   }
