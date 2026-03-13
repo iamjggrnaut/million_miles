@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && python3 -m venv /opt/argos-venv \
     && /opt/argos-venv/bin/pip install --upgrade pip \
-    && /opt/argos-venv/bin/pip install --no-cache-dir argos-translate \
+    && /opt/argos-venv/bin/pip install --no-cache-dir argostranslate \
     && mkdir -p /app/argos-packages \
     && /opt/argos-venv/bin/argospm update || true \
     && (/opt/argos-venv/bin/argospm install translate-ja_en || true) \
