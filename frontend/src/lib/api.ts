@@ -1,4 +1,4 @@
-import type { Car, CarsResponse, CarsQuery, ApiError } from "shared/types";
+import type { Car, CarsResponse, CarsQuery, ApiError } from "@/types/api";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
