@@ -125,7 +125,7 @@ export default function CarDetailPage() {
                   sizes="(max-width: 640px) 100vw, 50vw"
                 />
               </div>
-              {car.photos.slice(1, 5).map((url, i) => (
+              {car.photos.slice(1, 5).map((url: string, i: number) => (
                 <div key={i} className="aspect-[4/3] hidden sm:block">
                   <img src={url} alt="" className="w-full h-full object-cover" />
                 </div>
