@@ -31,6 +31,8 @@ export async function translate(
   const cached = cache.get(key);
   if (cached !== undefined) return cached;
 
+  const TRANSLATE_TIMEOUT_MS = Number(process.env.TRANSLATE_TIMEOUT_MS) || 60_000;
+
   return new Promise((resolve) => {
     const args = ['--from-lang', fromLang, '--to-lang', toLang];
     const proc = spawn(CMD, args, {
@@ -40,15 +42,36 @@ export async function translate(
 
     let out = '';
     let err = '';
+    let settled = false;
+    const finish = (result: string) => {
+      if (settled) return;
+      settled = true;
+      try {
+        proc.kill('SIGKILL');
+      } catch {
+        /* ignore */
+      }
+      cache.set(key, result);
+      resolve(result);
+    };
+
+    const timeout = setTimeout(() => {
+      logger.warn('Translate CLI timeout', { fromLang, toLang, timeoutMs: TRANSLATE_TIMEOUT_MS });
+      finish(trimmed);
+    }, TRANSLATE_TIMEOUT_MS);
+
     proc.stdout?.on('data', (chunk: Buffer) => { out += chunk.toString(); });
     proc.stderr?.on('data', (chunk: Buffer) => { err += chunk.toString(); });
 
     proc.on('error', (e) => {
       logger.warn('Translate CLI spawn failed', { cmd: CMD, error: String(e) });
-      cache.set(key, trimmed);
-      resolve(trimmed);
+      clearTimeout(timeout);
+      finish(trimmed);
     });
     proc.on('close', (code) => {
+      clearTimeout(timeout);
+      if (settled) return;
+      settled = true;
       const result = out.trim() || trimmed;
       if (code === 0 && result !== trimmed) {
         cache.set(key, result);

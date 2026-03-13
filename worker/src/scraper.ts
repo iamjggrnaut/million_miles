@@ -71,6 +71,7 @@ export async function fetchListingPage(page = 1): Promise<{ detailUrls: string[]
   const params: Record<string, string> = { NEW: '1', SORT: '19' };
   if (page > 1) params.PAGE = String(page);
 
+  logger.info('Fetching listing page', { page });
   const res = await withRetry(
     () => client.get<string>(LIST_PATH, { params }),
     { maxAttempts: 3, baseDelayMs: 2000, onRetry: (attempt, err) => logger.warn('Listing fetch retry', { attempt, page, error: String(err) }) }
@@ -88,6 +89,7 @@ export async function fetchListingPage(page = 1): Promise<{ detailUrls: string[]
   });
 
   const hasMore = $('a[href*="PAGE="], .pagination a').length > 0;
+  logger.info('Listing page done', { page, detailCount: detailUrls.length, hasMore });
   return { detailUrls, hasMore };
 }
 
@@ -213,12 +215,14 @@ export async function runScrape(options: {
 
   for (let page = 1; page <= maxListPages; page++) {
     const { detailUrls } = await fetchListingPage(page);
-    for (const url of detailUrls) {
+    for (let i = 0; i < detailUrls.length; i++) {
       if (results.length >= maxCarsPerRun) break;
+      const url = detailUrls[i];
       const id = extractExternalId(url);
       if (!id || seenIds.has(id)) continue;
       seenIds.add(id);
 
+      logger.info('Scraping detail', { n: results.length + 1, max: maxCarsPerRun, external_id: id });
       const car = await scrapeDetailPage(url);
       if (car) results.push(car);
       await new Promise((r) => setTimeout(r, delayMs));
