@@ -25,7 +25,7 @@ export async function translate(
   const trimmed = String(text).trim().slice(0, MAX_CHARS);
   if (!trimmed) return null;
 
-  if (!ENABLED) return trimmed;
+  if (!ENABLED) return null;
 
   const key = cacheKey(trimmed, fromLang, toLang);
   const cached = cache.get(key);
@@ -43,7 +43,7 @@ export async function translate(
     let out = '';
     let err = '';
     let settled = false;
-    const finish = (result: string) => {
+    const finish = (result: string | null) => {
       if (settled) return;
       settled = true;
       try {
@@ -51,13 +51,13 @@ export async function translate(
       } catch {
         /* ignore */
       }
-      cache.set(key, result);
+      if (result !== null) cache.set(key, result);
       resolve(result);
     };
 
     const timeout = setTimeout(() => {
       logger.warn('Translate CLI timeout', { fromLang, toLang, timeoutMs: TRANSLATE_TIMEOUT_MS });
-      finish(trimmed);
+      finish(null);
     }, TRANSLATE_TIMEOUT_MS);
 
     proc.stdout?.on('data', (chunk: Buffer) => { out += chunk.toString(); });
@@ -66,20 +66,19 @@ export async function translate(
     proc.on('error', (e) => {
       logger.warn('Translate CLI spawn failed', { cmd: CMD, error: String(e) });
       clearTimeout(timeout);
-      finish(trimmed);
+      finish(null);
     });
     proc.on('close', (code) => {
       clearTimeout(timeout);
       if (settled) return;
       settled = true;
-      const result = out.trim() || trimmed;
-      if (code === 0 && result !== trimmed) {
+      const result = out.trim();
+      if (code === 0 && result && result !== trimmed) {
         cache.set(key, result);
         resolve(result);
       } else {
-        if (code !== 0) logger.warn('Translate CLI exit non-zero', { code, stderr: err.slice(0, 200) });
-        cache.set(key, trimmed);
-        resolve(trimmed);
+        if (code !== 0) logger.warn('Translate CLI exit non-zero', { code, fromLang, toLang, stderr: err.slice(0, 300) });
+        resolve(null);
       }
     });
 
@@ -104,5 +103,6 @@ export async function translateJaToEnAndRu(
       : en
         ? await translate(en, 'en', 'ru')
         : null;
+  if (!en && !ru) logger.debug('Translation unavailable', { textLen: String(text).length });
   return { en: en ?? null, ru: ru ?? null };
 }
