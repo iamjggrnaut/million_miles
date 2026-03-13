@@ -165,6 +165,12 @@ export default function CarDetailPage() {
                 )
             )}
           </dl>
+          {(!(car.dealer_name_ru ?? car.dealer_name_en) && car.dealer_name) ||
+          (!(car.region_ru ?? car.region_en) && car.region) ? (
+            <p className="px-4 py-2 text-xs text-zinc-400 border-t border-zinc-100">
+              Дилер/регион на японском — для перевода запустите воркер с Argos и перезапустите скрап.
+            </p>
+          ) : null}
         </div>
 
         {(car.description_ru ?? car.description_en ?? car.description) && (
@@ -173,6 +179,11 @@ export default function CarDetailPage() {
             <p className="text-zinc-600 text-sm whitespace-pre-wrap">
               {car.description_ru ?? car.description_en ?? car.description}
             </p>
+            {!(car.description_ru ?? car.description_en) && (
+              <p className="mt-2 text-xs text-zinc-400">
+                Перевод недоступен. Для перевода на русский запустите воркер с Argos и перезапустите скрап.
+              </p>
+            )}
           </div>
         )}
 

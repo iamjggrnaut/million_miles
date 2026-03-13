@@ -5,6 +5,14 @@ const ENABLED = process.env.LOCAL_TRANSLATE_ENABLED !== 'false';
 const CMD = process.env.TRANSLATE_CMD ?? 'argos-translate';
 const MAX_CHARS = 2000;
 
+export function isTranslationEnabled(): boolean {
+  return ENABLED;
+}
+
+export function getTranslateCmd(): string {
+  return CMD;
+}
+
 const cache = new Map<string, string>();
 
 function cacheKey(text: string, from: string, to: string): string {
