@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -8,8 +6,6 @@ services:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app_secret
       POSTGRES_DB: million_miles
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
