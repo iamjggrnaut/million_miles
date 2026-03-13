@@ -87,12 +87,12 @@ export default function CarsPage() {
   }, [mounted, router, params]);
 
   const updateParams = (next: Partial<CarsQuery>) => {
-    setParams((p) => ({ ...p, ...next, page: 1 }));
+    setParams((prev: CarsQuery) => ({ ...prev, ...next, page: 1 }));
   };
 
   const clearFilters = () => {
-    setParams((p) => ({
-      ...p,
+    setParams((prev: CarsQuery) => ({
+      ...prev,
       page: 1,
       brand: undefined,
       year_min: undefined,
