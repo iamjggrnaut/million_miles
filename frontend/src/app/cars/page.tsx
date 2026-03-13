@@ -360,7 +360,10 @@ export default function CarsPage() {
                   type="button"
                   disabled={(params.page ?? 1) <= 1}
                   onClick={() =>
-                    setParams((p) => ({ ...p, page: (p.page ?? 1) - 1 }))
+                    setParams((prev: CarsQuery) => ({
+                      ...prev,
+                      page: (prev.page ?? 1) - 1,
+                    }))
                   }
                   className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-50"
                 >
@@ -373,7 +376,10 @@ export default function CarsPage() {
                   type="button"
                   disabled={(params.page ?? 1) >= data.totalPages}
                   onClick={() =>
-                    setParams((p) => ({ ...p, page: (p.page ?? 1) + 1 }))
+                    setParams((prev: CarsQuery) => ({
+                      ...prev,
+                      page: (prev.page ?? 1) + 1,
+                    }))
                   }
                   className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-50"
                 >
